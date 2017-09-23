@@ -30,33 +30,36 @@ func (builder MessageBuilder) Summary() string {
 }
 
 func (builder MessageBuilder) buildMessage(issues []Issue) string {
-	openIssues := filterIssues(issues, "open")
-	closedIssues := filterIssues(issues, "closed")
-
 	message := ""
-	message = message + fmt.Sprintf("*OPEN (%v)*\n", len(openIssues))
-	for _, issue := range openIssues {
+	for _, issue := range issues {
 		message = message + fmt.Sprintf("<%v|%v - %v> (%v)\n", issue.HTMLURL, issue.Number, issue.Title, issue.AssigneeName())
 	}
-
-	message = message + fmt.Sprintf("*CLOSED (%v)*\n", len(closedIssues))
-	for _, issue := range closedIssues {
-		message = message + fmt.Sprintf("<%v|%v - %v> (%v)\n", issue.HTMLURL, issue.Number, issue.Title, issue.AssigneeName())
-	}
-
 	return message
 }
 
-func (builder MessageBuilder) buildAttachment(issues []Issue, pretext string) sp.Attachment {
+func (builder MessageBuilder) buildAttachment(issues []Issue, pretext string, color string) sp.Attachment {
 	message := builder.buildMessage(issues)
 
 	return sp.Attachment{
 		Pretext:  pretext,
 		Fallback: message,
 		Text:     message,
-		Color:    "good",
+		Color:    color,
 		MrkdwnIn: []string{"pretext", "text", "fallback"},
 	}
+}
+
+func (builder MessageBuilder) buildAttachments(issues []Issue, pretext string) []sp.Attachment {
+	openIssues := filterIssues(issues, "open")
+	closedIssues := filterIssues(issues, "closed")
+
+	openTitle := fmt.Sprintf("*%v | OPEN (%d)*", pretext, len(openIssues))
+	a1 := builder.buildAttachment(openIssues, openTitle, "danger")
+
+	closedTitle := fmt.Sprintf("*%v | CLOSED (%d)*", pretext, len(closedIssues))
+	a2 := builder.buildAttachment(closedIssues, closedTitle, "good")
+
+	return []sp.Attachment{a1, a2}
 }
 
 func (builder MessageBuilder) BuildAttachments(issues []Issue) []sp.Attachment {
@@ -72,10 +75,12 @@ func (builder MessageBuilder) BuildAttachments(issues []Issue) []sp.Attachment {
 		}
 	}
 
-	return []sp.Attachment{
-		builder.buildAttachment(issueItems, "*ISSUE*"),
-		builder.buildAttachment(pullItems, "*PULL REQUEST*"),
-	}
+	var attachments []sp.Attachment
+	a1 := builder.buildAttachments(issueItems, "ISSUE")
+	a2 := builder.buildAttachments(pullItems, "PULL REQUEST")
+	attachments = append(attachments, a1...)
+	attachments = append(attachments, a2...)
+	return attachments
 }
 
 func NewMessageBuilder(gh GitHubAPI, milestone string) MessageBuilder {

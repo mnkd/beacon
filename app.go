@@ -32,12 +32,9 @@ func (app App) Run() int {
 	payload.Channel = app.Slack.Channel
 	payload.Username = app.Slack.Username
 	payload.IconEmoji = app.Slack.IconEmoji
-	// payload.LinkNames = true
 	payload.Mrkdwn = true
 	payload.Text = summary
 	payload.Attachments = attachments
-
-	// app.Slack.DryRun = true
 
 	err = app.Slack.PostPayload(payload)
 	if err != nil {
