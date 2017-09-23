@@ -1,0 +1,3 @@
+package: github.com/mnkd/heacon
+import:
+- package: github.com/mnkd/slackposter

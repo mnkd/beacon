@@ -1,17 +1,16 @@
 NAME     := beacon
 VERSION  := 0.1.0
 REVISION := $(shell git rev-parse --short HEAD)
-SRCS     := $(shell find . -type f -name '*.go')
 LDFLAGS  := -ldflags="-X \"main.version=$(VERSION)\" -X \"main.revision=$(REVISION)\""
 
-bin/$(NAME): $(SRCS) format
+bin/$(NAME): format deps
 	go build $(LDFLAGS) -o bin/$(NAME)
 
-linux: $(SRCS) format
+linux: format
 	GOOS=linux GOARCH=amd64 go build $(LDFLAGS) -o bin/$(NAME)
 
 format:
-	go fmt $(SRCS)
+	go fmt
 
 clean:
 	rm -rf bin/*
@@ -19,4 +18,10 @@ clean:
 install:
 	go install $(LDFLAGS)
 
-.PHONY: format, clean, install
+deps:
+	glide install
+
+update:
+	glide update
+
+.PHONY: format, clean, install, deps, update
