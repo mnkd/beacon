@@ -1,0 +1,16 @@
+{
+  "app": {
+    "use_holiday_jp": true,
+    "use_dayoff": true
+  },
+  "github": {
+    "access_token": "your GitHub access_token"
+  }
+  "slack_webhook": {
+    "team": "(optional) your team",
+    "channel": "#your-channel",
+    "username": "GitHub | Milestone",
+    "icon_emoji": ":octocat:",
+    "webhook_url": "https://hooks.slack.com/services/xxx/yyy/zzz"
+  }
+}
